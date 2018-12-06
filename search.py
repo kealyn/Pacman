@@ -76,52 +76,10 @@ class node:
     """
     Class of node which is pushed and popped from the fringe for search exploration
     """
-    def __init__(self, state, moves):
+    def __init__(self, state, moves, cost = 0):
         self.state = state
         self.moves = moves
-
-def search_algorithm(startState, fringeContainer, isGoalState, getSuccessors):
-    """
-    A generic search algorithm that searches from start state until goal state is reached.
-
-    :param startState: start state
-    :param fringeContainer: the container type of the fringe
-    :param isGoalState: API that checks whether the given state is goal state
-    :param getSuccessors: API that returns the list of successors given state
-    :return: Sequence of moves
-    """
-    if isGoalState(startState):
-        # start state is goal state
-        return []
-
-    fringe  = fringeContainer()  # fringe that holds states to be visited
-    moves   = []                 # sequence of moves
-    visited = set()              # set of visited states
-
-    fringe.push(node(startState, moves))
-    while not fringe.isEmpty():
-        curr = fringe.pop()
-        cur_state = curr.state
-        cur_moves = curr.moves
-
-        # check for goal state
-        if isGoalState(cur_state):
-            return cur_moves
-
-        # skip or add to visited
-        if cur_state in visited:
-            continue
-        visited.add(cur_state)
-
-        # get successors
-        successors = getSuccessors(cur_state)
-        for triplet in successors:
-            state = triplet[0]
-            action = triplet[1]
-            cost = triplet[2]
-            fringe.push(node(state, cur_moves + [action]))
-    return []
-
+        self.cost  = cost
 
 def depthFirstSearch(problem):
     """
@@ -137,17 +95,20 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    return search_algorithm(problem.getStartState(), util.Stack, problem.isGoalState, problem.getSuccessors)
+    return search_algorithm(problem,
+                            util.Stack)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    return search_algorithm(problem.getStartState(), util.Queue, problem.isGoalState, problem.getSuccessors)
+    return search_algorithm(problem,
+                            util.Queue)
 
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return search_algorithm(problem,
+                            util.PriorityQueue,
+                            True)
 
 def nullHeuristic(state, problem=None):
     """
@@ -158,8 +119,10 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return search_algorithm(problem,
+                            util.PriorityQueue,
+                            True,
+                            heuristic)
 
 
 # Abbreviations
@@ -167,3 +130,59 @@ bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
 ucs = uniformCostSearch
+
+
+def search_algorithm(problem, fringeContainer, considerPriority = False, heuristic = nullHeuristic):
+    """
+    A generic search algorithm that searches from start state until goal state is reached.
+
+    :param problem: the problem
+    :param fringeContainer: the container type of the fringe
+    :param considerPriority: flag that indicates whether the priority is considered
+    :param heuristic: heuristic that is used in computing priority (astar)
+    :return: Sequence of moves
+    """
+    startState = problem.getStartState()
+    if problem.isGoalState(startState):
+        # start state is goal state
+        return []
+
+    fringe  = fringeContainer()  # fringe that holds states to be visited
+    moves   = []                 # sequence of moves
+    visited = set()              # set of visited states
+
+    if not considerPriority:
+        fringe.push(node(startState, moves))
+    else:
+        fringe.push(node(startState, moves, 0), 0)
+    while not fringe.isEmpty():
+        curr = fringe.pop()
+        cur_state = curr.state
+        cur_moves = curr.moves
+        cur_cost  = curr.cost
+
+        # check for goal state
+        if problem.isGoalState(cur_state):
+            return cur_moves
+
+        # skip or add to visited
+        if cur_state in visited:
+            continue
+        visited.add(cur_state)
+
+        # get successors
+        successors = problem.getSuccessors(cur_state)
+        for triplet in successors:
+            state = triplet[0]
+            action = triplet[1]
+            cost = triplet[2]
+            if not considerPriority:
+                fringe.push(node(state, cur_moves + [action], cost))
+            else:
+                cummulative_cost = cur_cost + cost + heuristic(state, problem)
+                fringe.update(
+                    node(state, cur_moves + [action], cummulative_cost),
+                    cummulative_cost
+                )
+
+    return []
