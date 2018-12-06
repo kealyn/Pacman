@@ -1,14 +1,15 @@
 # Pacman
-2018.12.4
+2018.12.5
 
 In this project, the Pacman agent will find paths through his maze world, both to reach a particular location and to collect food efficiently. We will build general search algorithms and apply them to Pacman scenarios.
 
 #### DFS
-![](dfs.png)
+<img src="dfs.png" width="500">
+
 Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures. The algorithm starts at the root node (selecting some arbitrary node as the root node in the case of a graph) and explores as far as possible along each branch before backtracking ([wiki](https://en.wikipedia.org/wiki/Depth-first_search)).
 
 #### BFS
-![](bfs.png)
+<img src="bfs.png" width="500">
 
 Breadth-first search (BFS) is an algorithm for traversing or searching tree or graph data structures. It starts at the tree root (or some arbitrary node of a graph), and explores all of the neighbor nodes at the present depth prior to moving on to the nodes at the next depth level ([wiki](https://en.wikipedia.org/wiki/Breadth-first_search)).
 
