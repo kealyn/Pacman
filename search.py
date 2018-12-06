@@ -72,6 +72,57 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+class node:
+    """
+    Class of node which is pushed and popped from the fringe for search exploration
+    """
+    def __init__(self, state, moves):
+        self.state = state
+        self.moves = moves
+
+def search_algorithm(startState, fringeContainer, isGoalState, getSuccessors):
+    """
+    A generic search algorithm that searches from start state until goal state is reached.
+
+    :param startState: start state
+    :param fringeContainer: the container type of the fringe
+    :param isGoalState: API that checks whether the given state is goal state
+    :param getSuccessors: API that returns the list of successors given state
+    :return: Sequence of moves
+    """
+    if isGoalState(startState):
+        # start state is goal state
+        return []
+
+    fringe  = fringeContainer()  # fringe that holds states to be visited
+    moves   = []                 # sequence of moves
+    visited = set()              # set of visited states
+
+    fringe.push(node(startState, moves))
+    while not fringe.isEmpty():
+        curr = fringe.pop()
+        cur_state = curr.state
+        cur_moves = curr.moves
+
+        # check for goal state
+        if isGoalState(cur_state):
+            return cur_moves
+
+        # skip or add to visited
+        if cur_state in visited:
+            continue
+        visited.add(cur_state)
+
+        # get successors
+        successors = getSuccessors(cur_state)
+        for triplet in successors:
+            state = triplet[0]
+            action = triplet[1]
+            cost = triplet[2]
+            fringe.push(node(state, cur_moves + [action]))
+    return []
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -86,13 +137,12 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return search_algorithm(problem.getStartState(), util.Stack, problem.isGoalState, problem.getSuccessors)
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return search_algorithm(problem.getStartState(), util.Queue, problem.isGoalState, problem.getSuccessors)
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
