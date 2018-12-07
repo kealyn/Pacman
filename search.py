@@ -72,7 +72,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-class node:
+class Node:
     """
     Class of node which is pushed and popped from the fringe for search exploration
     """
@@ -152,9 +152,9 @@ def search_algorithm(problem, fringeContainer, considerPriority = False, heurist
     visited = set()              # set of visited states
 
     if not considerPriority:
-        fringe.push(node(startState, moves))
+        fringe.push(Node(startState, moves))
     else:
-        fringe.push(node(startState, moves, 0), 0)
+        fringe.push(Node(startState, moves, 0), 0)
     while not fringe.isEmpty():
         curr = fringe.pop()
         cur_state = curr.state
@@ -177,11 +177,11 @@ def search_algorithm(problem, fringeContainer, considerPriority = False, heurist
             action = triplet[1]
             cost = triplet[2]
             if not considerPriority:
-                fringe.push(node(state, cur_moves + [action], cost))
+                fringe.push(Node(state, cur_moves + [action], cost))
             else:
                 cummulative_cost = cur_cost + cost + heuristic(state, problem)
                 fringe.update(
-                    node(state, cur_moves + [action], cummulative_cost),
+                    Node(state, cur_moves + [action], cummulative_cost),
                     cummulative_cost
                 )
 
