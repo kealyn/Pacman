@@ -181,7 +181,7 @@ def search_algorithm(problem, fringeContainer, considerPriority = False, heurist
             else:
                 cummulative_cost = cur_cost + cost + heuristic(state, problem)
                 fringe.update(
-                    Node(state, cur_moves + [action], cummulative_cost),
+                    Node(state, cur_moves + [action], cur_cost + cost),
                     cummulative_cost
                 )
 
