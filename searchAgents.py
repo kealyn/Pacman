@@ -472,6 +472,11 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+def getMazeDistanceFromHeuristicInfo(pos_1, pos_2, problem):
+    if pos_1 == pos_2:
+        return 0
+    return problem.heuristicInfo[(pos_1, pos_2)]
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -500,13 +505,38 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    pac_pos, foodGrid = state
     remaining_food = foodGrid.asList()
-    print ("================")
-    print (remaining_food)
-    total_dist = get_combined_manhattan_dist(position, remaining_food)
+    if len(remaining_food) == 0:
+        return 0
 
-    return total_dist
+    anyGameState = problem.startingGameState
+
+    # Pre-processing of pair-wise food distances for the first time
+    if 'initialized' not in problem.heuristicInfo:
+        for i in range(len(remaining_food)):
+            for j in range(len(remaining_food)):
+                if i == j:
+                    continue
+                if (remaining_food[i], remaining_food[j]) not in problem.heuristicInfo:
+                    dist = mazeDistance(remaining_food[i], remaining_food[j], anyGameState)
+                    problem.heuristicInfo[(remaining_food[i], remaining_food[j])] = dist
+                    problem.heuristicInfo[(remaining_food[j], remaining_food[i])] = dist
+
+    # Mark it as initialized
+    problem.heuristicInfo['initialized'] = True
+
+    # Pre-processing of pair-wise distances if not exists
+    for food_pos in remaining_food:
+        if (pac_pos, food_pos) not in problem.heuristicInfo:
+            dist = mazeDistance(pac_pos, food_pos, anyGameState)
+            problem.heuristicInfo[(pac_pos, food_pos)] = dist
+            problem.heuristicInfo[(food_pos, pac_pos)] = dist
+
+    # Find the food that is closest to the current position
+    dist_closest, closest_food_pos = min([(getMazeDistanceFromHeuristicInfo(pac_pos, food_i, problem), food_i) for food_i in remaining_food])
+    dist_furtherest = max([getMazeDistanceFromHeuristicInfo(closest_food_pos, food_i, problem) for food_i in remaining_food])
+    return dist_closest + dist_furtherest
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
